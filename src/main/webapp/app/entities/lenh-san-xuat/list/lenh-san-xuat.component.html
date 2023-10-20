@@ -1,0 +1,170 @@
+<div>
+  <h2 id="page-heading" data-cy="LenhSanXuatHeading">
+    <span>Danh sách thông tin tem theo lệnh sản xuất</span>
+
+    <div class="d-flex justify-content-end">
+      <button class="btn btn-info me-2" (click)="loadPage()" [disabled]="isLoading">
+        <fa-icon icon="sync" [spin]="isLoading"></fa-icon>
+        <span>Refresh List</span>
+      </button>
+
+      <button
+        id="jh-create-entity"
+        data-cy="entityCreateButton"
+        class="btn btn-primary jh-create-entity create-lenh-san-xuat"
+        [routerLink]="['/lenh-san-xuat/new']"
+      >
+        <fa-icon icon="plus"></fa-icon>
+        <span> Create a new Lenh San Xuat </span>
+      </button>
+    </div>
+  </h2>
+
+  <jhi-alert-error></jhi-alert-error>
+
+  <div class="alert alert-warning" id="no-result" *ngIf="lenhSanXuats?.length === 0">
+    <span>No lenhSanXuats found</span>
+  </div>
+
+  <div class="table-responsive" id="entities" *ngIf="lenhSanXuats && lenhSanXuats.length > 0">
+    <table class="table table-striped" aria-describedby="page-heading">
+      <thead>
+        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending" (sortChange)="loadPage()">
+          <th scope="col" jhiSortBy="STT">
+            <span>STT</span>
+            <input type="text" style="width: 10px; border: none; background-color: #f2f2f2;">
+          </th>
+          <th scope="col" jhiSortBy="maLenhSanXuat">
+            <span>Mã lệnh sản xuất</span>
+             <input #searchInput type="text" [(ngModel)]="maLenhSanXuat" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+            <option *ngFor="let data of lenhSanXuats" value="{{data.maLenhSanXuat}}"></option>
+          
+          <!-- <select id="dropDownList" 
+            class="selectpicker" 
+            title="Show Level" 
+            multiple 
+            data-actions-box="true"
+            data-placement="top" 
+            data-toggle="tooltip">
+            <option *ngFor="let data of lenhSanXuats" value="{{data.maLenhSanXuat}}">{{data.maLenhSanXuat}}</option>
+          </select> -->
+
+          </th>
+          <th scope="col" jhiSortBy="sapCode">
+            <span>Mã SAP</span>
+             <input #searchInput type="text" [(ngModel)]="SAPcode" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="sapName">
+            <span>Tên SAP</span>
+             <input #searchInput type="text" [(ngModel)]="SAPname" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="workOrderCode">
+            <span>Mã WO</span>
+             <input #searchInput type="text" [(ngModel)]="WOcode" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="version">
+            <span>Version</span>
+             <input #searchInput type="text" [(ngModel)]="version" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="storageCode">
+            <span>Mã kho nhập</span>
+             <input #searchInput type="text" [(ngModel)]="InventoryCode" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="totalQuantity">
+            <span>Tổng số lượng nhập</span>
+            <input style="border: none; width: 9rem; background-color: #f2f2f2;">
+          </th>
+          <th scope="col" jhiSortBy="createBy">
+            <span>Cập nhật bởi</span>
+             <input #searchInput type="text" [(ngModel)]="UpdateBy" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="entryTime">
+            <span>Thời gian in tem</span>
+            <input type="datetime-local" ngbDatepicker #d="ngbDatepicker"/>
+          </th>
+          <th scope="col" jhiSortBy="trangThai">
+            <span>Trạng thái</span>
+             <input #searchInput type="text" [(ngModel)]="status" [ngModelOptions]="{standalone: true}"
+              (keydown.enter)="timKiemTem()" placeholder="search" list="maThongSo" />
+          </th>
+          <th scope="col" jhiSortBy="comment">
+            <span>Lưu ý</span>
+            <input style="border: none; width: 3rem; background-color: #f2f2f2;">
+          </th>
+          <th scope="col">
+            <span>Options</span>
+            <input style="border: none; width: 70%; background-color: #f2f2f2;">
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let lenhSanXuat of lenhSanXuats; let i = index; trackBy: trackId" data-cy="entityTable">
+          <td>
+            <a>{{i+1}}</a>
+          </td>
+          <td>{{ lenhSanXuat.maLenhSanXuat }}</td>
+          <td>{{ lenhSanXuat.sapCode }}</td>
+          <td>{{ lenhSanXuat.sapName }}</td>
+          <td>{{ lenhSanXuat.workOrderCode }}</td>
+          <td>{{ lenhSanXuat.version }}</td>
+          <td>{{ lenhSanXuat.storageCode }}</td>
+          <td>{{ lenhSanXuat.totalQuantity }}</td>
+          <td>{{ lenhSanXuat.createBy }}</td>
+          <td>{{ lenhSanXuat.entryTime }}</td>
+          <td>{{ lenhSanXuat.trangThai }}</td>
+          <td>{{ lenhSanXuat.comment }}</td>  
+          <td class="text-end">
+            <div class="btn-group">
+              <button
+                type="submit"
+                [routerLink]="['/lenh-san-xuat', lenhSanXuat.id, 'view']"
+                class="btn btn-info btn-sm"
+                data-cy="entityDetailsButton"
+              >
+                <fa-icon icon="eye"></fa-icon>
+                <!-- <span class="d-none d-md-inline">View</span> -->
+              </button>
+
+              <button
+                type="submit"
+                [routerLink]="['/lenh-san-xuat', lenhSanXuat.id, 'edit']"
+                class="btn btn-primary btn-sm"
+                data-cy="entityEditButton"
+              >
+                <fa-icon icon="pencil-alt"></fa-icon>
+                <!-- <span class="d-none d-md-inline">Edit</span> -->
+              </button>
+
+              <!-- <button type="submit" (click)="delete(lenhSanXuat)" class="btn btn-danger btn-sm" data-cy="entityDeleteButton">
+                <fa-icon icon="times"></fa-icon>
+                <span class="d-none d-md-inline">Delete</span>
+              </button> -->
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="lenhSanXuats && lenhSanXuats.length > 0">
+    <div>
+      <ngb-pagination
+        [collectionSize]="totalItems"
+        [(page)]="ngbPaginationPage"
+        [pageSize]="itemsPerPage"
+        [maxSize]="5"
+        [rotate]="true"
+        [boundaryLinks]="true"
+        (pageChange)="loadPage($event)"
+        style="float: right;"
+      ></ngb-pagination>
+    </div>
+  </div>
+</div>
