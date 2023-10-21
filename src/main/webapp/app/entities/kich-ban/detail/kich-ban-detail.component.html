@@ -113,11 +113,14 @@
         <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Back</span>
       </button>
 
-      <div *jhiHasAnyAuthority="''">
-        <button type="button" [routerLink]="['/kich-ban', kichBan.id, 'edit']" class="btn btn-primary">
-          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
-        </button>
-      </div>
+      <button
+        *jhiHasAnyAuthority="'ROLE_ADMIN_PROFILE'"
+        type="button"
+        [routerLink]="['/kich-ban', kichBan.id, 'edit']"
+        class="btn btn-primary"
+      >
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
+      </button>
     </div>
   </div>
 </div>

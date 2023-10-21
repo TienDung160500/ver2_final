@@ -1,8 +1,7 @@
-// import { IDropdownSettings } from 'ng-multiselect-dropdown';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { IThietBi } from 'app/entities/thiet-bi/thiet-bi.model';
 import { FormGroup, FormBuilder } from '@angular/forms';
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
 import { HttpHeaders, HttpResponse, HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest } from 'rxjs';
@@ -23,6 +22,18 @@ export class SanXuatHangNgayComponent implements OnInit {
   resourceUrl = this.applicationConfigService.getEndpointFor('api/san-xuat-hang-ngay/tim-kiem');
 
   form: FormGroup = new FormGroup({});
+
+  formSearch = this.formBuilder.group({
+    maKichBan: '',
+    maThietBi: '',
+    loaiThietBi: '',
+    dayChuyen: '',
+    maSanPham: '',
+    versionSanPham: '',
+    ngayTao: null,
+    timeUpdate: null,
+    trangThai: '',
+  });
 
   maKichBan = '';
   maThietBi = '';
@@ -76,9 +87,7 @@ export class SanXuatHangNgayComponent implements OnInit {
   loadContent = false;
   name = 'Cricketers';
 
-  // dropdownList: { item_id: number; item_text: string }[] = [];
-  // selectedList: { item_id: number; item_text: string }[] = [];
-  // dropdownSettings?: IDropdownSettings;
+  @Input() itemPerPage = 10;
 
   constructor(
     protected sanXuatHangNgayService: SanXuatHangNgayService,
@@ -87,26 +96,17 @@ export class SanXuatHangNgayComponent implements OnInit {
     protected modalService: NgbModal,
     protected fb: FormBuilder,
     protected http: HttpClient,
-    protected applicationConfigService: ApplicationConfigService
+    protected applicationConfigService: ApplicationConfigService,
+    protected formBuilder: FormBuilder
   ) {}
 
-  timKiemSanXuatHangNgay(): void {
-    //request den server
-    const timKiem = {
-      maKichBan: this.maKichBan,
-      maThietBi: this.maThietBi,
-      loaiThietBi: this.loaiThietBi,
-      dayChuyen: this.dayChuyen,
-      maSanPham: this.maSanPham,
-      versionSanPham: this.versionSanPham,
-      ngayTao: this.ngayTao,
-      timeUpdate: this.timeUpdate,
-      updateBy: '',
-      trangThai: this.trangThai,
-    };
-    this.http.post<any>(this.resourceUrl, timKiem).subscribe(res => {
-      //luu du lieu tra ve de hien thi len front-end
+  timKiemSanXuatHangNgay(data: any, page?: number, dontNavigate?: boolean): void {
+    const pageToLoad: number = page ?? this.page ?? 1;
+    this.searchResults = [];
+
+    this.http.post<any>(this.resourceUrl, data).subscribe(res => {
       this.sanXuatHangNgays = res;
+      this.onSuccess(res.sanXuatHangNgays, res.headers, pageToLoad, !dontNavigate);
     });
   }
 
@@ -124,79 +124,17 @@ export class SanXuatHangNgayComponent implements OnInit {
     return item.id!;
   }
 
-  loadPage(page?: number, dontNavigate?: boolean): void {
-    this.isLoading = true;
-    const pageToLoad: number = page ?? this.page ?? 1;
-
-    this.sanXuatHangNgayService
-      .query({
-        page: pageToLoad - 1,
-        size: this.itemsPerPage,
-        sort: this.sort(),
-      })
-      .subscribe({
-        next: (res: HttpResponse<ISanXuatHangNgay[]>) => {
-          this.isLoading = false;
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-          this.searchResults = res.body as any;
-        },
-        error: () => {
-          this.isLoading = false;
-          this.onError();
-        },
-      });
+  loadPage(): void {
+    this.timKiemSanXuatHangNgay(this.formSearch.value);
   }
 
   ngOnInit(): void {
     this.handleNavigation();
-
-    // this.dropdownList = [
-    //   { item_id: 1, item_text: 'Mumbai' },
-    //   { item_id: 2, item_text: 'Bangaluru' },
-    //   { item_id: 3, item_text: 'Pune' },
-    //   { item_id: 4, item_text: 'Navsari' },
-    //   { item_id: 5, item_text: 'New Delhi' },
-    // ];
-
-  //   this.selectedList = {
-  //     singleSelection: false,
-  //     idField: 'item_id',
-  //     textField: 'item_text',
-  //     enableCheckAll: true,
-  //     selectAllText: 'Chọn All',
-  //     unSelectAllText: 'Hủy chọn',
-  //     allowSearchFilter: true,
-  //     limitSelection: -1,
-  //     clearSearchFilter: true,
-  //     maxHeight: 197,
-  //     itemsShowLimit: 3,
-  //     searchPlaceholderText: 'Tìm kiếm',
-  //     noDataAvailablePlaceholderText: 'Không có dữ liệu',
-  //     closeDropDownOnSelection: false,
-  //     showSelectedItemsAtTop: false,
-  //     defaultOpen: false,
-  //   };
-  //   this.setForm();
-  // }
-
-    // this.dropdownSettings = {
-    //   singleSelection: false,
-    //   idField: 'item_id',
-    //   textField: 'item_text',
-    //   selectAllText: 'Select All',
-    //   unSelectAllText: 'UnSelect All',
-    //   itemsShowLimit: 3,
-    //   allowSearchFilter: true,
-    // };
+    this.formSearch.valueChanges.subscribe(data => {
+      this.timKiemSanXuatHangNgay(data);
+    });
   }
-  // onItemSelect(item: any): void {
-  //   console.log(item);
-  //   console.log(this.selectedList);
-  // }
-  // OnItemDeSelect(item: any): void {
-  //   console.log(item);
-  //   console.log(this.selectedList);
-  // }
+
   onSelectAll(items: any): void {
     console.log(items);
   }
@@ -219,7 +157,7 @@ export class SanXuatHangNgayComponent implements OnInit {
     });
   }
 
-  protected sort(): string[] {
+  sort(): string[] {
     const result = [this.predicate + ',' + (this.ascending ? ASC : DESC)];
     if (this.predicate !== 'id') {
       result.push('id');
@@ -227,7 +165,7 @@ export class SanXuatHangNgayComponent implements OnInit {
     return result;
   }
 
-  protected handleNavigation(): void {
+  handleNavigation(): void {
     combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([data, params]) => {
       const page = params.get('page');
       const pageNumber = +(page ?? 1);
@@ -237,12 +175,12 @@ export class SanXuatHangNgayComponent implements OnInit {
       if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
         this.predicate = predicate;
         this.ascending = ascending;
-        this.loadPage(pageNumber, true);
+        this.loadPage();
       }
     });
   }
 
-  protected onSuccess(data: ISanXuatHangNgay[] | null, headers: HttpHeaders, page: number, navigate: boolean): void {
+  onSuccess(data: ISanXuatHangNgay[] | null, headers: HttpHeaders, page: number, navigate: boolean): void {
     this.totalItems = Number(headers.get('X-Total-Count'));
     this.page = page;
     if (navigate) {
@@ -258,7 +196,7 @@ export class SanXuatHangNgayComponent implements OnInit {
     this.ngbPaginationPage = this.page;
   }
 
-  protected onError(): void {
+  onError(): void {
     this.ngbPaginationPage = this.page ?? 1;
   }
 }

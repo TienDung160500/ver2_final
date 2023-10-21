@@ -1,3 +1,5 @@
+import { IChiTietKichBan } from 'app/entities/chi-tiet-kich-ban/chi-tiet-kich-ban.model';
+import { FormBuilder } from '@angular/forms';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { Component, OnInit, Input, ViewChild, ElementRef } from '@angular/core';
 import { HttpHeaders, HttpResponse, HttpClient } from '@angular/common/http';
@@ -18,6 +20,22 @@ import { KichBanDeleteDialogComponent } from '../delete/kich-ban-delete-dialog.c
 })
 export class KichBanComponent implements OnInit {
   resourceUrl = this.applicationConfigService.getEndpointFor('api/kich-bans/tim-kiem');
+  resourceUrlKB = this.applicationConfigService.getEndpointFor('api/kich-ban/thong-so-kich-ban');
+
+  formSearch = this.formBuilder.group({
+    maKichBan: '',
+    maThietBi: '',
+    loaiThietBi: '',
+    dayChuyen: '',
+    maSanPham: '',
+    versionSanPham: '',
+    ngayTao: null,
+    timeUpdate: null,
+    updateBy: '',
+    trangThai: '',
+  });
+
+  @Input() itemPerPage = 10;
 
   @Input() maKichBan = '';
   @Input() maThietBi = '';
@@ -42,7 +60,10 @@ export class KichBanComponent implements OnInit {
   @ViewChild('searchInput', { static: true })
   searchInput!: ElementRef;
 
-  kichBans?: IKichBan[] = [];
+  chiTietKichBans: IChiTietKichBan[] | null = [];
+  kichBan: IKichBan | null = null;
+
+  kichBans?: IKichBan[];
   isLoading = false;
   totalItems = 0;
   itemsPerPage = ITEMS_PER_PAGE;
@@ -59,62 +80,49 @@ export class KichBanComponent implements OnInit {
     protected router: Router,
     protected modalService: NgbModal,
     protected http: HttpClient,
-    protected applicationConfigService: ApplicationConfigService
-  ) { }
+    protected applicationConfigService: ApplicationConfigService,
+    protected formBuilder: FormBuilder
+  ) {}
 
-  timKiemKichBan(): void {
-    //xoa du lieu cu
-    this.kichBans = [];
-    //request den server
-    const timKiem = {
-      maKichBan: this.maKichBan,
-      maThietBi: this.maThietBi,
-      loaiThietBi: this.loaiThietBi,
-      dayChuyen: this.dayChuyen,
-      maSanPham: this.maSanPham,
-      versionSanPham: this.versionSanPham,
-      ngayTao: this.ngayTao,
-      timeUpdate: this.timeUpdate,
-      updateBy: this.updateBy,
-      trangThai: this.trangThai,
-    };
-    this.http.post<any>(this.resourceUrl, timKiem).subscribe(res => {
-      //luu du lieu tra ve de hien thi len front-end
+  timKiemKichBan(data: any, page?: number, dontNavigate?: boolean): void {
+    const pageToLoad: number = page ?? this.page ?? 1;
+    this.searchResults = [];
+
+    this.http.post<any>(this.resourceUrl, data).subscribe(res => {
       this.kichBans = res;
-      // console.log('tim kiem', timKiem); 
-      // console.log('result:',res); 
+
+      this.onSuccess(res.kichBans, res.headers, pageToLoad, !dontNavigate);
     });
   }
 
-  loadPage(page?: number, dontNavigate?: boolean): void {
-    this.isLoading = true;
-    const pageToLoad: number = page ?? this.page ?? 1;
-
-    this.kichBanService
-      .query({
-        page: pageToLoad - 1,
-        size: this.itemsPerPage,
-        sort: this.sort(),
-      })
-      .subscribe({
-        next: (res: HttpResponse<IKichBan[]>) => {
-          this.isLoading = false;
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-          this.searchResults = res.body as any;
-        },
-        error: () => {
-          this.isLoading = false;
-          this.onError();
-        },
-      });
+  loadPage(): void {
+    this.timKiemKichBan(this.formSearch.value);
   }
 
   ngOnInit(): void {
     this.handleNavigation();
+    this.formSearch.valueChanges.subscribe(data => {
+      this.timKiemKichBan(data);
+    });
+    this.activatedRoute.data.subscribe(({ kichBan }) => {
+      this.kichBan = kichBan;
+    });
+    // lay thong tin thong so thiet bi
+    if (this.kichBan?.id) {
+      this.http.get<any>(`${this.resourceUrlKB}/${this.kichBan.id}`).subscribe(res => {
+        this.chiTietKichBans = res;
+        console.log('res :', res);
+        console.log('chi tiet kich ban :', this.chiTietKichBans);
+      });
+    }
   }
 
   trackId(_index: number, item: IKichBan): number {
     return item.id!;
+  }
+
+  openModal(content: any): void {
+    this.modalService.open(content, { size: 'lg' });
   }
 
   delete(kichBan: IKichBan): void {
@@ -137,16 +145,17 @@ export class KichBanComponent implements OnInit {
   }
 
   protected handleNavigation(): void {
-    combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([ data, params ]) => {// cái này chỉr sẻt kieu any cho gia tri dau tien, cai thu 2 phai tu set
+    combineLatest([this.activatedRoute.data, this.activatedRoute.queryParamMap]).subscribe(([data, params]) => {
+      // cái này chỉr sẻt kieu any cho gia tri dau tien, cai thu 2 phai tu set
       const page = params.get('page');
-        const pageNumber = +(page ?? 1);
-        const sort = (params.get(SORT) ?? data['defaultSort']).split(',');
-        const predicate = sort[0];
-        const ascending = sort[1] === ASC;
-        if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
-          this.predicate = predicate;
-          this.ascending = ascending;
-          this.loadPage(pageNumber, true);
+      const pageNumber = +(page ?? 1);
+      const sort = (params.get(SORT) ?? data['defaultSort']).split(',');
+      const predicate = sort[0];
+      const ascending = sort[1] === ASC;
+      if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
+        this.predicate = predicate;
+        this.ascending = ascending;
+        this.loadPage();
       }
     });
   }

@@ -1,3 +1,4 @@
+import { NgxPaginationModule } from 'ngx-pagination';
 import { NgModule } from '@angular/core';
 import { SharedModule } from 'app/shared/shared.module';
 import { KichBanComponent } from './list/kich-ban.component';
@@ -7,7 +8,7 @@ import { KichBanDeleteDialogComponent } from './delete/kich-ban-delete-dialog.co
 import { KichBanRoutingModule } from './route/kich-ban-routing.module';
 
 @NgModule({
-  imports: [SharedModule, KichBanRoutingModule],
+  imports: [SharedModule, KichBanRoutingModule, NgxPaginationModule],
   declarations: [KichBanComponent, KichBanDetailComponent, KichBanUpdateComponent, KichBanDeleteDialogComponent],
   entryComponents: [KichBanDeleteDialogComponent],
 })

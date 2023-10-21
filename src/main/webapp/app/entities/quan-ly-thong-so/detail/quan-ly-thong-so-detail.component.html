@@ -5,10 +5,6 @@
 
       <hr />
 
-      <jhi-alert-error></jhi-alert-error>
-
-      <jhi-alert></jhi-alert>
-
       <table class="table table-striped" aria-describedby="page-heading">
         <thead>
           <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
@@ -57,11 +53,14 @@
         <fa-icon icon="arrow-left"></fa-icon>&nbsp;<span>Back</span>
       </button>
 
-      <div *jhiHasAnyAuthority="''">
-        <button type="button" [routerLink]="['/quan-ly-thong-so', quanLyThongSo.id, 'edit']" class="btn btn-primary">
-          <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
-        </button>
-      </div>
+      <button
+        *jhiHasAnyAuthority="'ROLE_ADMIN_PROFILE'"
+        type="button"
+        [routerLink]="['/quan-ly-thong-so', quanLyThongSo.id, 'edit']"
+        class="btn btn-primary"
+      >
+        <fa-icon icon="pencil-alt"></fa-icon>&nbsp;<span>Edit</span>
+      </button>
     </div>
   </div>
 </div>

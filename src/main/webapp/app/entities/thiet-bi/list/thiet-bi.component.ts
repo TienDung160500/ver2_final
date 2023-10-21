@@ -1,3 +1,4 @@
+import { FormBuilder } from '@angular/forms';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { Component, OnInit, Input, ElementRef, ViewChild } from '@angular/core';
 import { HttpHeaders, HttpResponse, HttpClient } from '@angular/common/http';
@@ -18,6 +19,21 @@ import { ThietBiDeleteDialogComponent } from '../delete/thiet-bi-delete-dialog.c
 })
 export class ThietBiComponent implements OnInit {
   resourceUrl = this.applicationConfigService.getEndpointFor('api/thiet-bis/tim-kiem');
+
+  formSearch = this.formBuilder.group({
+    maThietBi: '',
+    loaiThietBi: '',
+    dayChuyen: '',
+    thongSo: '',
+    ngayTao: null,
+    ngayUpdate: null,
+    updateBy: '',
+    status: '',
+    moTa: '',
+    phanLoai: '',
+  });
+
+  @Input() itemPerPage = 10;
 
   @Input() maThietBi = '';
   @Input() loaiThietBi = '';
@@ -57,35 +73,19 @@ export class ThietBiComponent implements OnInit {
     protected modalService: NgbModal,
     // nhận tham chiếu đến HttpClient để thực hiện các yêu cầu Http
     protected http: HttpClient,
-    protected applicationConfigService: ApplicationConfigService
-  ) { }
+    protected applicationConfigService: ApplicationConfigService,
+    private formBuilder: FormBuilder
+  ) {}
 
-  loadPage(page?: number, dontNavigate?: boolean): void {
-    this.isLoading = true;
-    const pageToLoad: number = page ?? this.page ?? 1;
-
-    this.thietBiService
-      .query({
-        page: pageToLoad - 1,
-        size: this.itemsPerPage,
-        sort: this.sort(),
-      })
-      .subscribe({
-        next: (res: HttpResponse<IThietBi[]>) => {
-          this.isLoading = false;
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-          this.searchResults = res.body as any;
-          // console.log("page", this.searchResults);
-        },
-        error: () => {
-          this.isLoading = false;
-          this.onError();
-        },
-      });
+  loadPage(): void {
+    this.timKiemThietBi(this.formSearch.value);
   }
 
   ngOnInit(): void {
     this.handleNavigation();
+    this.formSearch.valueChanges.subscribe(data => {
+      this.timKiemThietBi(data);
+    });
   }
 
   // được gọi mỗi khi có sự kiện nhập trong ô tìm kiếm, kiểm tra nếu từ khóa tìm kiếm trống thì showSuggestions là false
@@ -128,7 +128,7 @@ export class ThietBiComponent implements OnInit {
       if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
         this.predicate = predicate;
         this.ascending = ascending;
-        this.loadPage(pageNumber, true);
+        this.loadPage();
       }
     });
   }
@@ -161,22 +161,17 @@ export class ThietBiComponent implements OnInit {
     return of(suggestions);
   }
 
-  timKiemThietBi(): void {
-    //request den server
-    const timKiem = {
-      maThietBi: this.maThietBi,
-      loaiThietBi: this.loaiThietBi,
-      dayChuyen: this.dayChuyen,
-      ngayTao: this.ngayTao,
-      timeUpdate: this.timeUpdate,
-      updateBy: this.updateBy,
-      status: this.status,
-    };
+  timKiemThietBi(data: any, page?: number, dontNavigate?: boolean): void {
+    const pageToLoad: number = page ?? this.page ?? 1;
+
+    this.searchResults = [];
+
     // console.log("body:", timKiem)
-    this.http.post<any>(this.resourceUrl, timKiem).subscribe(res => {
+    this.http.post<any>(this.resourceUrl, data).subscribe(res => {
       //luu du lieu tra ve de hien thi len front-end
       this.thietBis = res;
       // console.log('res', res);
+      this.onSuccess(res.thietBis, res.headers, pageToLoad, !dontNavigate);
     });
   }
 }

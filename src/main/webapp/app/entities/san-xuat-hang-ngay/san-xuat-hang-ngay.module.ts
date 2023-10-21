@@ -1,3 +1,4 @@
+import { NgxPaginationModule } from 'ngx-pagination';
 import { NgModule } from '@angular/core';
 import { SharedModule } from 'app/shared/shared.module';
 import { SanXuatHangNgayComponent } from './list/san-xuat-hang-ngay.component';
@@ -7,7 +8,7 @@ import { SanXuatHangNgayDeleteDialogComponent } from './delete/san-xuat-hang-nga
 import { SanXuatHangNgayRoutingModule } from './route/san-xuat-hang-ngay-routing.module';
 
 @NgModule({
-  imports: [SharedModule, SanXuatHangNgayRoutingModule],
+  imports: [SharedModule, SanXuatHangNgayRoutingModule, NgxPaginationModule],
   declarations: [
     SanXuatHangNgayComponent,
     SanXuatHangNgayDetailComponent,

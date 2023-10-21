@@ -1,9 +1,8 @@
-
 import { Account } from './../../../core/auth/account.model';
 import { FormBuilder } from '@angular/forms';
 import { ApplicationConfigService } from 'app/core/config/application-config.service';
 import { Component, OnInit, ViewChild, ElementRef, Input } from '@angular/core';
-import { HttpHeaders, HttpResponse, HttpClient } from '@angular/common/http';
+import { HttpHeaders, HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Subject } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -26,11 +25,6 @@ export class QuanLyThongSoComponent implements OnInit {
 
   account: Account | null = null;
 
-  maxResultToShow = 10;
-  showingResults = 10;
-  currentPage = 1;
-  startIndex = 0;
-
   formSearch = this.formBuilder.group({
     maThongSo: '',
     tenThongSo: '',
@@ -39,7 +33,9 @@ export class QuanLyThongSoComponent implements OnInit {
     ngayUpdate: null,
     updateBy: '',
     status: '',
-  })
+  });
+
+  @Input() itemPerPage = 10;
 
   @Input() maThongSo = '';
   @Input() tenThongSo = '';
@@ -87,7 +83,7 @@ export class QuanLyThongSoComponent implements OnInit {
     protected modalService: NgbModal,
     protected http: HttpClient,
     protected applicationConfigService: ApplicationConfigService,
-    private formBuilder: FormBuilder
+    protected formBuilder: FormBuilder
   ) {}
   // ------------------------------------------- lay danh sach quan ly thong so
   getQuanLyThongSoList(): void {
@@ -110,65 +106,32 @@ export class QuanLyThongSoComponent implements OnInit {
     this.searchResults = this.listQuanLyThongSo.filter((obj: any) => obj.name.toLowerCase().includes(this.searchTerm.toLowerCase));
   }
 
-  timKiemThietBi(data: any, page?: number, dontNavigate?: boolean ): void {
+  timKiemThietBi(data: any, page?: number, dontNavigate?: boolean): void {
     const pageToLoad: number = page ?? this.page ?? 1;
 
     // xoa du lieu cu
     this.searchResults = [];
-    // request den server
-    
+
     this.http.post<any>(this.resourceUrl, data).subscribe(res => {
       // luu du lieu tra ve de hien thi len front-end
       this.quanLyThongSos = res;
       // console.log('res', res)
-      console.log(this.quanLyThongSos)
-      // tinh chi so bat dau cua cua ket qua can hien thi tren trang hien tai bang cach lay trang hien tai(this.currentPage) nhan voi so ket qua toi da can hien thi tren moi trang
-      this.startIndex = (this.currentPage - 1) * this.maxResultToShow;
-      // su dung slice de cat mang, chi lay nhung ket qua can hien thi tren trang hien tai, gioi han ket qua cua trang hien tai de hien thi so luong toi da
-      this.quanLyThongSos = this.quanLyThongSos?.slice(this.startIndex, this.startIndex + this.maxResultToShow);
-      // this.updateResultSuggestions(res.quanLyThongSos);
-      // goi ham de cap nhat trang, hien thi ket qua va thuc hien dieu huong sau khi tim kiem hoan tat
+      console.log(this.quanLyThongSos);
+
       this.onSuccess(res.quanLyThongSos, res.headers, pageToLoad, !dontNavigate);
     });
   }
 
-  loadPage(page?: number, dontNavigate?: boolean): void {
-    // thong bao load du lieu
-    this.isLoading = true;
-    // xac dinh trang se duoc tai. kiem tra tham so page duoc truyen vao co phai null or undefined, thi no se sd gia tri cua page, neu kh thi se ktra this.page, neu ca 2 kh co thi mac dinh la 1
-    const pageToLoad: number = page ?? this.page ?? 1;
-    // cap nhat gia tri cua bien current page thanh trang hien tai
-    this.currentPage = pageToLoad;
-    // truy van du lieu thong qua phuong thuc query. gom truyen thong tin ve trang, kich thuoc trang, cach sx du lieu
-    this.quanLyThongSoService
-      .query({
-        page: pageToLoad - 1,
-        size: this.maxResultToShow,
-        sort: this.sort(),
-      })
-      // su dung observable de lang nghe ket qua tu yeu cau truy van. neu yeu cau thanh cong, ham callback next se duoc goi
-      .subscribe({
-        next: (res: HttpResponse<IQuanLyThongSo[]>) => {
-          // dat bien isloading thanh false de tai du lieu
-          this.isLoading = false;
-          // goi ham onSuccess de cap nhat du lieu tren trang hien tai dua tren ket qua tra ve tu yeu cau truy van
-          this.onSuccess(res.body, res.headers, pageToLoad, !dontNavigate);
-          // goi ham timkiemthietbi de thuc hien tim kiem voi trang hien tai va chuyen den trang tuong ung
-          this.timKiemThietBi(res.body, pageToLoad, !dontNavigate);
-        },
-        error: () => {
-          this.isLoading = false;
-          this.onError();
-        },
-      });
+  loadPage(): void {
+    this.timKiemThietBi(this.formSearch.value);
   }
 
   ngOnInit(): void {
     this.handleNavigation();
     this.getQuanLyThongSoList();
-    this.formSearch.valueChanges.subscribe((data) => {
-      this.timKiemThietBi(data)
-    })
+    this.formSearch.valueChanges.subscribe(data => {
+      this.timKiemThietBi(data);
+    });
   }
 
   onSearchTermChange(): void {
@@ -215,7 +178,7 @@ export class QuanLyThongSoComponent implements OnInit {
       if (pageNumber !== this.page || predicate !== this.predicate || ascending !== this.ascending) {
         this.predicate = predicate;
         this.ascending = ascending;
-        this.loadPage(pageNumber, true);
+        this.loadPage();
       }
     });
   }
