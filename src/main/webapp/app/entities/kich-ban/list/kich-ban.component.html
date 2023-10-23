@@ -128,7 +128,7 @@
                   *jhiHasAnyAuthority="'ROLE_ADMIN_PROFILE'; rOLE_CREATE_PROFILE"
                   type="submit"
                   class="btn-info btn-sm"
-                  (click)="openModal(content)"
+                  (click)="openModal(kichBan.id, kichBan.maKichBan, content)"
                 >
                   <fa-icon icon="sync"></fa-icon>
                 </button>
@@ -183,72 +183,130 @@
 </div>
 
 <ng-template #content let-c="close" let-d="dismiss">
-  <div class="modal-header">
-    <h4 class="modal-title">Thông tin đã thay đổi</h4>
-    <button type="button" class="close" aria-label="Close" (click)="c('Close click')">
-      <span aria-hidden="true">&times;</span>
-    </button>
-  </div>
-  <div class="modal-body">
-    <h4 data-cy="kichBanDetailsHeading"><span>Thông tin chi tiết kịch bản</span></h4>
-    <hr />
-    <table class="table table-striped" aria-describedby="page-heading">
-      <thead>
-        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
-          <th scope="col" jhiSortBy="maKichBan"><span>Mã kịch bản</span></th>
-          <th scope="col" jhiSortBy="loaiThietBi"><span>Loại thiết bị</span></th>
-          <th scope="col" jhiSortBy="maThietBi"><span>Mã thiết bị</span></th>
-          <th scope="col" jhiSortBy="dayChuyen"><span>Dây chuyền</span></th>
-          <th scope="col" jhiSortBy="maSanPham"><span>Mã sản phẩm</span></th>
-          <th scope="col" jhiSortBy="versionSanPham"><span>Version sản phẩm</span></th>
-        </tr>
-      </thead>
-      <tbody>
-        <td>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-        </td>
-      </tbody>
-    </table>
+  <div class="modal-lg">
+    <div class="modal-header">
+      <h4 class="modal-title">Đối chiếu và đồng bộ</h4>
+      <!-- <button type="button" class="btn btn-secondary close" aria-label="Close" (click)="c('Close click')">
+          <span aria-hidden="true">&times;</span>
+        </button> -->
 
-    <hr />
-    <h4>Thông số kịch bản</h4>
+      <button type="button" class="btn-close" data-dismiss="modal" aria-hidden="true" (click)="c('Close click')"></button>
+    </div>
+    <div class="modal-body">
+      <h4 data-cy="kichBanDetailsHeading"><span>Thông tin chi tiết kịch bản</span></h4>
+      <hr />
+      <table class="table table-striped" aria-describedby="page-heading">
+        <thead>
+          <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
+            <th scope="col" jhiSortBy="maKichBan"><span>Mã kịch bản</span></th>
+            <th scope="col" jhiSortBy="loaiThietBi"><span>Loại thiết bị</span></th>
+            <th scope="col" jhiSortBy="maThietBi"><span>Mã thiết bị</span></th>
+            <th scope="col" jhiSortBy="dayChuyen"><span>Dây chuyền</span></th>
+            <th scope="col" jhiSortBy="maSanPham"><span>Mã sản phẩm</span></th>
+            <th scope="col" jhiSortBy="versionSanPham"><span>Version sản phẩm</span></th>
+          </tr>
+        </thead>
+        <tbody *ngIf="kichBan">
+          <td>
+            <span>{{ kichBan.maKichBan }}</span>
+          </td>
+          <td>
+            <span>{{ kichBan.loaiThietBi }}</span>
+          </td>
+          <td>
+            <span>{{ kichBan.maThietBi }}</span>
+          </td>
+          <td>
+            <span>{{ kichBan.dayChuyen }}</span>
+          </td>
+          <td>
+            <span>{{ kichBan.maSanPham }}</span>
+          </td>
+          <td>
+            <span>{{ kichBan.versionSanPham }}</span>
+          </td>
+        </tbody>
+      </table>
 
-    <table class="table table-striped" aria-describedby="page-heading">
-      <thead>
-        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
-          <th scope="col" jhiSortBy="id"><span>STT</span></th>
-          <th scope="col" jhiSortBy="thongSo"><span>Thông số</span></th>
-          <th scope="col" jhiSortBy="minValue"><span>Min</span></th>
-          <th scope="col" jhiSortBy="maxValue"><span>Max</span></th>
-          <th scope="col" jhiSortBy="trungBinh"><span>Trung bình</span></th>
-          <th scope="col" jhiSortBy="donVi"><span>Đơn vị</span></th>
-        </tr>
-      </thead>
-    </table>
+      <div class="table-header-kichban">
+        <h4>Thông số kịch bản</h4>
+        <h4>Thông số sản xuất hàng ngày</h4>
+      </div>
+      <div class="table-body-kichban">
+        <table class="table table-striped table-kichban" aria-describedby="page-heading">
+          <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
+              <th scope="col" jhiSortBy="id"><span>STT</span></th>
+              <th scope="col" jhiSortBy="thongSo"><span>Thông số</span></th>
+              <th scope="col" jhiSortBy="minValue"><span>Min</span></th>
+              <th scope="col" jhiSortBy="maxValue"><span>Max</span></th>
+              <th scope="col" jhiSortBy="trungBinh"><span>Trung bình</span></th>
+              <th scope="col" jhiSortBy="donVi"><span>Đơn vị</span></th>
+            </tr>
+          </thead>
+          <tbody *ngFor="let data of chiTietKichBans; let i = index">
+            <td>
+              <span>{{ i + 1 }}</span>
+            </td>
+            <td>
+              <span>{{ data.thongSo }}</span>
+            </td>
+            <td>
+              <span>{{ data.minValue }}</span>
+            </td>
+            <td>
+              <span>{{ data.maxValue }}</span>
+            </td>
+            <td>
+              <span>{{ data.trungbinh }}</span>
+            </td>
+            <td>
+              <span>{{ data.donVi }}</span>
+            </td>
+          </tbody>
+        </table>
 
-    <hr />
-    <h4>Thông số sản xuất hàng ngày</h4>
+        <table class="table table-striped table-sxhn" aria-describedby="page-heading">
+          <thead>
+            <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
+              <th scope="col" jhiSortBy="id"><span>STT</span></th>
+              <th scope="col" jhiSortBy="thongSo"><span>Thông số</span></th>
+              <th scope="col" jhiSortBy="minValue"><span>Min</span></th>
+              <th scope="col" jhiSortBy="maxValue"><span>Max</span></th>
+              <th scope="col" jhiSortBy="trungBinh"><span>Trung bình</span></th>
+              <th scope="col" jhiSortBy="donVi"><span>Đơn vị</span></th>
+            </tr>
+          </thead>
+          <tbody *ngFor="let dataSXHN of chiTietSanXuats; let i = index">
+            <td>
+              <span>{{ i + 1 }}</span>
+            </td>
 
-    <table class="table table-striped" aria-describedby="page-heading">
-      <thead>
-        <tr jhiSort [(predicate)]="predicate" [(ascending)]="ascending">
-          <th scope="col" jhiSortBy="id"><span>STT</span></th>
-          <th scope="col" jhiSortBy="thongSo"><span>Thông số</span></th>
-          <th scope="col" jhiSortBy="minValue"><span>Min</span></th>
-          <th scope="col" jhiSortBy="maxValue"><span>Max</span></th>
-          <th scope="col" jhiSortBy="trungBinh"><span>Trung bình</span></th>
-          <th scope="col" jhiSortBy="donVi"><span>Đơn vị</span></th>
-        </tr>
-      </thead>
-    </table>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-secondary" (click)="c('Close click')">Đóng</button>
-    <button type="button" class="btn btn-primary btn-sm">Đồng bộ</button>
+            <td>
+              <span>{{ dataSXHN.thongSo }}</span>
+            </td>
+
+            <td>
+              <span>{{ dataSXHN.minValue }}</span>
+            </td>
+
+            <td>
+              <span>{{ dataSXHN.maxValue }}</span>
+            </td>
+
+            <td>
+              <span>{{ dataSXHN.trungbinh }}</span>
+            </td>
+            <td>
+              <span>{{ dataSXHN.donVi }}</span>
+            </td>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="c('Close click')">Đóng</button>
+      <button type="button" class="btn btn-primary btn-sm">Đồng bộ</button>
+    </div>
   </div>
 </ng-template>

@@ -183,7 +183,7 @@ entity detail page css
 }
 
 @media screen and (min-width: 768px) {
-  .row-md.jh-entity-details> {
+  .row-md.jh-entity-details > {
     dt {
       float: left;
       overflow: hidden;
@@ -242,6 +242,13 @@ angular-cli removes postcss-rtl processed inline css, processed rules must be ad
     .nav-item {
       margin-left: 0.5em;
     }
+  }
+}
+
+@media (min-width: 120rem) {
+  .modal-lg,
+  .modal-xl {
+    max-width: 100%;
   }
 }
 

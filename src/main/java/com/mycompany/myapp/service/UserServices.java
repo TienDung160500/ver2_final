@@ -1,18 +1,16 @@
 package com.mycompany.myapp.service;
 
-
 import com.mycompany.myapp.domain.*;
 import com.mycompany.myapp.repository.*;
 import com.mycompany.myapp.web.rest.request.*;
 import com.mycompany.myapp.web.rest.response.*;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 
 // ! chưa làm được
 // ? Chưa test với front-end
@@ -20,58 +18,68 @@ import java.util.List;
 // ☺ đã Test với front-end
 @Service
 public class UserServices {
+
     private final Logger log = LoggerFactory.getLogger(UserServices.class);
 
     @Autowired
     private UserRepository userRepository;
+
     @Autowired
     private QuanLyThongSoRepository quanLyThongSoRepository;
+
     @Autowired
     private ThietBiRepository thietBiRepository;
+
     @Autowired
     private ThongSoMayRepository thongSoMayRepository;
 
     @Autowired
     private KichBanRepository kichBanRepository;
+
     @Autowired
     private ChiTietKichBanRepository chiTietKichBanRepository;
+
     @Autowired
     private SanXuatHangNgayRepository sanXuatHangNgayRepository;
+
     @Autowired
     private ChiTietSanXuatRepository chiTietSanXuatRepository;
+
     @Autowired
     private NhomThietBiRepository nhomThietBiRepository;
+
     @Autowired
     private DonViRepository donViRepository;
+
     @Autowired
     private DayChuyenRepository dayChuyenRepository;
+
     //☺ Template login - Chức năng xác thực tài khoản
-//    public ResponseMessage loginAuth(UserPostRequest request) {
-//        UserEntity entity = userRepository.getByUserName(request.getUserName());
-//        boolean result = entity.getPassword().equals(request.getPassword());
-//        log.info("entity: " + entity);
-//        System.out.println("request: " + request);
-//        if (!result) {
-//            log.info("failed");
-//            return new ResponseMessage("Tài khoản hoặc mật khẩu bị sai");
-//        } else {
-//            log.info("success");
-//            // gán thời gian cho last_login trong DB
-//            entity.setLastLogin(request.getLastLogin());
-//            userRepository.save(entity);
-//            return new ResponseMessage("Đăng nhập thành công");
-//        }
-//    }
+    //    public ResponseMessage loginAuth(UserPostRequest request) {
+    //        UserEntity entity = userRepository.getByUserName(request.getUserName());
+    //        boolean result = entity.getPassword().equals(request.getPassword());
+    //        log.info("entity: " + entity);
+    //        System.out.println("request: " + request);
+    //        if (!result) {
+    //            log.info("failed");
+    //            return new ResponseMessage("Tài khoản hoặc mật khẩu bị sai");
+    //        } else {
+    //            log.info("success");
+    //            // gán thời gian cho last_login trong DB
+    //            entity.setLastLogin(request.getLastLogin());
+    //            userRepository.save(entity);
+    //            return new ResponseMessage("Đăng nhập thành công");
+    //        }
+    //    }
     //------------------------------------------- * --------------------------------------------------------------------
 
     //-----------------------                  Template Quản lý thông số                       -------- ----------------
     //☺ hàm format giá trị thông số
-    private static Float FormatValue(Float value){
+    private static Float FormatValue(Float value) {
         DecimalFormat decimalFormat = new DecimalFormat("#.##");
         System.out.println("testtttttttttttttttttttttttttttttttttt" + decimalFormat.format(value));
         return Float.parseFloat(decimalFormat.format(value));
     }
-
 
     //☺ Hàm set giá trị cho từng thuộc tính
     private static QuanLyThongSoResponse getQuanLyThongSoResponse(QuanLyThongSo entity) {
@@ -127,16 +135,18 @@ public class UserServices {
         log.info("Them moi thanh cong");
         return "Thêm mới thành công";
     }
+
     //☺ xem chi tiet thong so
-    public List<QuanLyThongSoResponse> getChiTietThongSo(String maThongSo){
+    public List<QuanLyThongSoResponse> getChiTietThongSo(String maThongSo) {
         List<QuanLyThongSo> entities = quanLyThongSoRepository.findAllByMaThongSo(maThongSo);
         List<QuanLyThongSoResponse> responseList = new ArrayList<>();
-        for (QuanLyThongSo entity : entities){
+        for (QuanLyThongSo entity : entities) {
             QuanLyThongSoResponse response = getQuanLyThongSoResponse(entity);
             responseList.add(response);
         }
         return responseList;
     }
+
     //☺ cap nhat thong so
     public String putThongSo(QuanLyThongSoRequest request, String maThongSo) {
         QuanLyThongSo entity = quanLyThongSoRepository.getByMaThongSo(maThongSo);
@@ -154,8 +164,13 @@ public class UserServices {
     //☺ su kien tim kiem
     public List<QuanLyThongSoResponse> timKiemThongSo(QuanLyThongSoRequest request) {
         var entities = quanLyThongSoRepository.timKiemThongSo(
-                request.getMaThongSo(), request.getTenThongSo(), request.getNgayTao(), request.getNgayUpdate(),
-                request.getUpdateBy(), request.getStatus());
+            request.getMaThongSo(),
+            request.getTenThongSo(),
+            request.getNgayTao(),
+            request.getNgayUpdate(),
+            request.getUpdateBy(),
+            request.getStatus()
+        );
         List<QuanLyThongSoResponse> responseList = new ArrayList<>();
         for (QuanLyThongSo entity : entities) {
             QuanLyThongSoResponse response = getQuanLyThongSoResponse(entity);
@@ -194,8 +209,15 @@ public class UserServices {
 
     //☺ Tìm kiếm
     public List<ThietBiResponse> timKiemThietBi(ThietBiRequest request) {
-        List<ThietBi> entities = thietBiRepository.timKiemThietBi(request.getMaThietBi(), request.getLoaiThietBi(),
-                request.getDayChuyen(), request.getNgayTao(), request.getTimeUpdate(), request.getUpdateBy(), request.getStatus());
+        List<ThietBi> entities = thietBiRepository.timKiemThietBi(
+            request.getMaThietBi(),
+            request.getLoaiThietBi(),
+            request.getDayChuyen(),
+            request.getNgayTao(),
+            request.getTimeUpdate(),
+            request.getUpdateBy(),
+            request.getStatus()
+        );
         List<ThietBiResponse> responseList = new ArrayList<>();
         log.info("request: " + request);
         for (ThietBi entity : entities) {
@@ -205,12 +227,13 @@ public class UserServices {
         }
         return responseList;
     }
+
     //☺ del thiết bị -> xoá luôn cả thông số thiết bị
-    public void delThongSoMay(Long id){
+    public void delThongSoMay(Long id) {
         ThietBi entities = thietBiRepository.findById(id).orElse(null);
-        if(entities == null){
+        if (entities == null) {
             log.info("khong tim thay thiet bi");
-        }else {
+        } else {
             List<ThongSoMay> entityList = thongSoMayRepository.findAllByThietBiId(id);
             thongSoMayRepository.deleteAll(entityList);
             thietBiRepository.delete(entities);
@@ -221,7 +244,7 @@ public class UserServices {
     //----------------------- Chức năng thêm mới thiết bị -----------------------------------------------
 
     //☺ Lấy thông tin loại thiết bị theo mã thiết bị từ table thiết bị
-        // ☺ thêm mới thiết bị vào DB
+    // ☺ thêm mới thiết bị vào DB
     public String postThietBi(ThietBiRequest request) {
         log.info("them moi thiet bi");
         ThietBi entity = new ThietBi();
@@ -236,7 +259,7 @@ public class UserServices {
         return "them moi thiet bi thanh cong !";
     }
 
-        //☺ thêm mới thông số thiết b vào DB
+    //☺ thêm mới thông số thiết b vào DB
     public void postThongSoMay(List<ThongSoMayRequest> requestList) {
         Integer row = 0;
         for (ThongSoMayRequest request : requestList) {
@@ -250,16 +273,17 @@ public class UserServices {
             entity.setTrangThai(request.getStatus());
             entity.setPhanLoai(request.getPhanLoai());
             thongSoMayRepository.save(entity);
-            System.out.println("ma thiet bi: "+request.getMaThietBi());
-            thongSoMayRepository.updateIdThietBi(request.getIdThietBi(),entity.getId());
+            System.out.println("ma thiet bi: " + request.getMaThietBi());
+            thongSoMayRepository.updateIdThietBi(request.getIdThietBi(), entity.getId());
         }
     }
+
     //----------------------- Chức năng cập nhật thông số thiết bị -----------------------------------------------
     //☺ xem danh sách thông số thiết bị bằng mã thiết bị
-    public List<ThongSoMayResponse> getDanhSachThongSoThietBi(String maThietBi){
+    public List<ThongSoMayResponse> getDanhSachThongSoThietBi(String maThietBi) {
         List<ThongSoMay> entities = thongSoMayRepository.findAllByMaThietBi(maThietBi);
         List<ThongSoMayResponse> responseList = new ArrayList<>();
-        for (ThongSoMay entity:entities){
+        for (ThongSoMay entity : entities) {
             ThongSoMayResponse response = new ThongSoMayResponse();
             response.setId(entity.getId());
             response.setMaThietBi(entity.getMaThietBi());
@@ -272,11 +296,12 @@ public class UserServices {
         }
         return responseList;
     }
+
     //☺ xem danh sách thông số thiết bị bằng id
-    public List<ThongSoMayResponse> getDanhSachThongSoThietBiById(Long id){
+    public List<ThongSoMayResponse> getDanhSachThongSoThietBiById(Long id) {
         List<ThongSoMay> entities = thongSoMayRepository.findAllByThietBiId(id);
         List<ThongSoMayResponse> responseList = new ArrayList<>();
-        for (ThongSoMay entity:entities){
+        for (ThongSoMay entity : entities) {
             ThongSoMayResponse response = new ThongSoMayResponse();
             response.setId(entity.getId());
             response.setMaThietBi(entity.getMaThietBi());
@@ -289,11 +314,12 @@ public class UserServices {
         }
         return responseList;
     }
+
     //☺ xem danh sách thông số thiết bị bằng loại thiết bị
-    public List<ThongSoMayResponse> getDanhSachThongSoThietBiByLoaiThietBi(String loaiThietBi){
+    public List<ThongSoMayResponse> getDanhSachThongSoThietBiByLoaiThietBi(String loaiThietBi) {
         List<ThongSoMay> entities = thongSoMayRepository.findAllByLoaiThietBi(loaiThietBi);
         List<ThongSoMayResponse> responseList = new ArrayList<>();
-        for (ThongSoMay entity:entities){
+        for (ThongSoMay entity : entities) {
             ThongSoMayResponse response = new ThongSoMayResponse();
             response.setId(entity.getId());
             response.setMaThietBi(entity.getMaThietBi());
@@ -306,11 +332,12 @@ public class UserServices {
         }
         return responseList;
     }
+
     //☺ xem danh sách thông số thiết bị bằng loại thiết bị
-    public List<ThongSoMayResponse> getDanhSachThongSoThietBiByLoaiThietBiAndMaThietBi(ThongSoMayRequest request){
-        List<ThongSoMay> entities = thongSoMayRepository.findAllByLoaiThietBiAndMaThietBi(request.getLoaiThietBi(),request.getMaThietBi());
+    public List<ThongSoMayResponse> getDanhSachThongSoThietBiByLoaiThietBiAndMaThietBi(ThongSoMayRequest request) {
+        List<ThongSoMay> entities = thongSoMayRepository.findAllByLoaiThietBiAndMaThietBi(request.getLoaiThietBi(), request.getMaThietBi());
         List<ThongSoMayResponse> responseList = new ArrayList<>();
-        for (ThongSoMay entity:entities){
+        for (ThongSoMay entity : entities) {
             ThongSoMayResponse response = new ThongSoMayResponse();
             response.setId(entity.getId());
             response.setMaThietBi(entity.getMaThietBi());
@@ -323,6 +350,7 @@ public class UserServices {
         }
         return responseList;
     }
+
     //☺ del thông số thiết bị
     public void delByIdThongSoThietBi(Long idThongSoThietBi) {
         ThongSoMay entity = thongSoMayRepository.findById(idThongSoThietBi).orElse(null);
@@ -335,10 +363,11 @@ public class UserServices {
             log.info(result);
         }
     }
+
     //? cập nhật thông số máy trong khi xem danh sách thông số máy
-    public void putThongSoMay(List<ThongSoMayRequest> requestList){
+    public void putThongSoMay(List<ThongSoMayRequest> requestList) {
         // tìm kiếm thông tin thông số theo id_thong_so_thiet_bi
-        for (ThongSoMayRequest request: requestList) {
+        for (ThongSoMayRequest request : requestList) {
             boolean result = thongSoMayRepository.existsById(request.getId());
             //cập nhật thông số đã có
             if (result == true) {
@@ -348,7 +377,7 @@ public class UserServices {
                 entity.setPhanLoai(request.getPhanLoai());
                 entity.setTrangThai(request.getStatus());
                 thongSoMayRepository.save(entity);
-            }else { // Thêm mới thông số chưa có
+            } else { // Thêm mới thông số chưa có
                 ThongSoMay entity1 = new ThongSoMay();
                 entity1.setLoaiThietBi(request.getLoaiThietBi());
                 entity1.setMaThietBi(request.getMaThietBi());
@@ -361,14 +390,16 @@ public class UserServices {
             }
         }
     }
+
     //☺ xem chi tiết thông số thiet bi
-    public  ThietBiResponse getAllById (Long id){
+    public ThietBiResponse getAllById(Long id) {
         ThietBi entity = thietBiRepository.getAllById(id);
         ThietBiResponse response = getThietBiResponse(entity);
         response.setThongSoMays(entity.getThongSoMays());
-        log.info("entity: "+ entity.getThongSoMays());
+        log.info("entity: " + entity.getThongSoMays());
         return response;
     }
+
     //------------------------------------------------ * ---------------------------------------------------------------
 
     //---------------------------------------              Kịch bản                ------------------------------------
@@ -403,21 +434,31 @@ public class UserServices {
 
     //☺ Tim kiem kich ban
     public List<KichBanResponse> timKiemKichBan(KichBanRequest request) {
-        List<KichBan> entities = kichBanRepository.timKiemKichBan(request.getMaKichBan(), request.getMaThietBi(),
-                request.getLoaiThietBi(), request.getDayChuyen(), request.getMaSanPham(), request.getVersionSanPham(),
-                request.getNgayTao(), request.getTimeUpdate(), request.getUpdateBy(), request.getTrangThai());
+        List<KichBan> entities = kichBanRepository.timKiemKichBan(
+            request.getMaKichBan(),
+            request.getMaThietBi(),
+            request.getLoaiThietBi(),
+            request.getDayChuyen(),
+            request.getMaSanPham(),
+            request.getVersionSanPham(),
+            request.getNgayTao(),
+            request.getTimeUpdate(),
+            request.getUpdateBy(),
+            request.getTrangThai()
+        );
         log.info("" + request);
         List<KichBanResponse> responseList = new ArrayList<>();
         for (KichBan entity : entities) {
-            System.out.println("thanh cong !: "+entities);
+            System.out.println("thanh cong !: " + entities);
             KichBanResponse response = getKichBanResponse(entity);
             responseList.add(response);
         }
         return responseList;
     }
+
     //? Them moi kich ban
-            //? B1: Thêm mới kịch bản
-    public String postKichBan(KichBanRequest request){
+    //? B1: Thêm mới kịch bản
+    public String postKichBan(KichBanRequest request) {
         log.info("Them moi kich ban");
         KichBan entity = new KichBan();
         entity.setMaKichBan(request.getMaKichBan());
@@ -433,9 +474,10 @@ public class UserServices {
         kichBanRepository.save(entity);
         return "Them moi kich ban thanh cong";
     }
-        //? B2: Thêm mới thông tin thông số kịch bản
-public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
-        for (ChiTietKichBanRequest request:requests){
+
+    //? B2: Thêm mới thông tin thông số kịch bản
+    public void postChiTietKichBan(List<ChiTietKichBanRequest> requests) {
+        for (ChiTietKichBanRequest request : requests) {
             ChiTietKichBan entity = new ChiTietKichBan();
             entity.setMaKichBan(request.getMaKichBan());
             entity.setHangMkb(request.getRows());
@@ -446,16 +488,17 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             entity.setDonVi(request.getDonVi());
             entity.setPhanLoai(request.getPhanLoai());
             chiTietKichBanRepository.save(entity);
-//            chiTietKichBanRepository.insertChiTietKichBan(request.getMaKichBan(), request.getRows(), request.getThongSo(), request.getMinValue(), request.getMaxValue(), request.getTrungbinh(), request.getDonVi(), request.getPhanLoai());
+            //            chiTietKichBanRepository.insertChiTietKichBan(request.getMaKichBan(), request.getRows(), request.getThongSo(), request.getMinValue(), request.getMaxValue(), request.getTrungbinh(), request.getDonVi(), request.getPhanLoai());
             chiTietKichBanRepository.updateIdKichBan(request.getIdKichBan(), entity.getId());
         }
-}
+    }
+
     //☺ xem danh sach thong so kich ban theo id kịch bản
-    public List<ChiTietKichBanResponse> getAllByIdKichBan(Long kichBanId){
+    public List<ChiTietKichBanResponse> getAllByIdKichBan(Long kichBanId) {
         List<ChiTietKichBan> entities = chiTietKichBanRepository.findAllByKichBanId(kichBanId);
         List<ChiTietKichBanResponse> responseList = new ArrayList<>();
         log.info("xem danh sach kich ban");
-        for (ChiTietKichBan entity:entities){
+        for (ChiTietKichBan entity : entities) {
             ChiTietKichBanResponse response = new ChiTietKichBanResponse();
             response.setId(entity.getId());
             response.setMaKichBan(entity.getMaKichBan());
@@ -470,12 +513,13 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         }
         return responseList;
     }
+
     //☺ xem danh sach thong so kich ban theo mã kịch bản
-    public List<ChiTietKichBanResponse> getAllByMaKichBan(String maKichBan){
+    public List<ChiTietKichBanResponse> getAllByMaKichBan(String maKichBan) {
         List<ChiTietKichBan> entities = chiTietKichBanRepository.getByMaKichBan(maKichBan);
         List<ChiTietKichBanResponse> responseList = new ArrayList<>();
         log.info("xem danh sach kich ban");
-        for (ChiTietKichBan entity:entities){
+        for (ChiTietKichBan entity : entities) {
             ChiTietKichBanResponse response = new ChiTietKichBanResponse();
             response.setMaKichBan(entity.getMaKichBan());
             response.setHangMkb(entity.getHangMkb());
@@ -489,20 +533,21 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         }
         return responseList;
     }
+
     //? cap nhat thong so kich ban
-    public void putChiTietKichBan(List<ChiTietKichBanRequest> requestList){
-        for (ChiTietKichBanRequest request:requestList) {
+    public void putChiTietKichBan(List<ChiTietKichBanRequest> requestList) {
+        for (ChiTietKichBanRequest request : requestList) {
             ChiTietKichBan entity = chiTietKichBanRepository.findById(request.getId()).orElse(null);
             // cap nhat thong so da co
             if (entity != null) {
                 entity.setThongSo(request.getThongSo());
                 entity.setMinValue(request.getMinValue());
-                System.out.println("entityyyyyyyyyyyyyyyyyyyyyyyyyyyy: "+ entity.getMinValue());
+                System.out.println("entityyyyyyyyyyyyyyyyyyyyyyyyyyyy: " + entity.getMinValue());
                 entity.setMaxValue(FormatValue(request.getMaxValue()));
                 entity.setTrungbinh(request.getTrungbinh());
                 entity.setDonVi(request.getDonVi());
                 chiTietKichBanRepository.save(entity);
-            }else { // them moi thong so chua co
+            } else { // them moi thong so chua co
                 ChiTietKichBan entity1 = new ChiTietKichBan();
                 entity1.setMaKichBan(request.getMaKichBan());
                 entity1.setThongSo(request.getThongSo());
@@ -515,12 +560,13 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             }
         }
     }
+
     // ☺ xoa kich ban
-    public void delKichBan(Long id){
+    public void delKichBan(Long id) {
         KichBan entities = kichBanRepository.findById(id).orElse(null);
-        if (entities == null){
+        if (entities == null) {
             log.info("khong tim thay kich ban");
-        }else {
+        } else {
             // tim kiem thong tin chi tiet kich ban
             List<ChiTietKichBan> entityList = chiTietKichBanRepository.findAllByKichBanId(id);
             chiTietKichBanRepository.deleteAll(entityList);
@@ -528,31 +574,48 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             log.info("xoa kich ban thanh cong");
         }
     }
+
     //☺ xoa thong so trong kich ban
-    public void delByIdChiTietKichBan(Long idChiTietKichBan){
+    public void delByIdChiTietKichBan(Long idChiTietKichBan) {
         ChiTietKichBan entities = chiTietKichBanRepository.findById(idChiTietKichBan).orElse(null);
-        if (entities == null){
+        if (entities == null) {
             log.info("khong tim thay thong so");
-        }else {
+        } else {
             chiTietKichBanRepository.delete(entities);
             log.info("xoa thong so kich ban thanh cong");
         }
     }
+
     //☺ xem chi tiet kich ban
-    public KichBanResponse chiTietKichBan(Long idKichBan){
+    public KichBanResponse chiTietKichBan(Long idKichBan) {
         KichBan entity = kichBanRepository.getAllById(idKichBan);
         KichBanResponse response = getKichBanResponse(entity);
         response.setChiTietKichBans(entity.getChiTietKichBans());
         log.info("sucess !");
-        return  response;
+        return response;
     }
+
     //☺ xem chi tiet kich ban
-    public KichBanResponse chiTietKichBanByMaKichban(String maKichBan){
+    public KichBanResponse chiTietKichBanByMaKichban(String maKichBan) {
         KichBan entity = kichBanRepository.findAllByMaKichBan(maKichBan);
         KichBanResponse response = getKichBanResponse(entity);
         response.setChiTietKichBans(entity.getChiTietKichBans());
         log.info("sucess !");
-        return  response;
+        return response;
+    }
+
+    //☺ xem thông tin kịch bản
+    public KichBanResponse getKichBanById(Long id) {
+        KichBan entity = kichBanRepository.getById(id);
+        KichBanResponse response = new KichBanResponse();
+        response.setId(entity.getId());
+        response.setMaKichBan(entity.getMaKichBan());
+        response.setLoaiThietBi(entity.getLoaiThietBi());
+        response.setMaThietBi(entity.getMaThietBi());
+        response.setMaSanPham(entity.getMaSanPham());
+        response.setVersionSanPham(entity.getVersionSanPham());
+        response.setDayChuyen(entity.getDayChuyen());
+        return response;
     }
 
     //----------------------------------------- * ----------------------------------------------------------------------
@@ -586,9 +649,17 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
 
     //? Tim kiem noi dung san xuat hang ngay
     public List<SanXuatHangNgayResponse> timKiemSanxuatHangNgay(SanXuatHangNgayRequest request) {
-        List<SanXuatHangNgay> entities = sanXuatHangNgayRepository.timKiemSanXuatHangNgay(request.getMaKichBan(), request.getMaThietBi(),
-                request.getLoaiThietBi(), request.getDayChuyen(), request.getMaSanPham(), request.getVersionSanPham(),
-                request.getNgayTao(), request.getTimeUpdate(), request.getTrangThai());
+        List<SanXuatHangNgay> entities = sanXuatHangNgayRepository.timKiemSanXuatHangNgay(
+            request.getMaKichBan(),
+            request.getMaThietBi(),
+            request.getLoaiThietBi(),
+            request.getDayChuyen(),
+            request.getMaSanPham(),
+            request.getVersionSanPham(),
+            request.getNgayTao(),
+            request.getTimeUpdate(),
+            request.getTrangThai()
+        );
         log.info("" + request);
         List<SanXuatHangNgayResponse> responseList = new ArrayList<>();
         for (SanXuatHangNgay entity : entities) {
@@ -598,10 +669,11 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         }
         return responseList;
     }
+
     // ? them moi kich ban san xuat
-    public String postSanXuatHangNgay(SanXuatHangNgayRequest request){
+    public String postSanXuatHangNgay(SanXuatHangNgayRequest request) {
         // them moi kich ban san xuat hang ngay
-        log.info("Them moi kich ban"+ request);
+        log.info("Them moi kich ban" + request);
         SanXuatHangNgay entity = new SanXuatHangNgay();
         entity.setMaKichBan(request.getMaKichBan());
         entity.setMaThietBi(request.getMaThietBi());
@@ -617,7 +689,7 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         List<ChiTietKichBan> entities = chiTietKichBanRepository.findAllByMaKichBan(request.getMaKichBan());
         List<ChiTietSanXuat> entityList = new ArrayList<>();
         // Note lưu thông tin thông số sản xuất hàng ngày
-        for (ChiTietKichBan entity1: entities){
+        for (ChiTietKichBan entity1 : entities) {
             ChiTietSanXuat entity2 = new ChiTietSanXuat();
             entity2.setMaKichBan(entity1.getMaKichBan());
             entity2.setHangSxhn(entity1.getHangMkb());
@@ -628,13 +700,13 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             entity2.setDonVi(entity1.getDonVi());
             chiTietSanXuatRepository.save(entity2);
             chiTietSanXuatRepository.updateIdSanXuatHangNgay(request.getIdSanXuatHangNgay(), entity2.getId());
-
         }
         return "Them moi kich ban thanh cong";
     }
+
     //? B2: Thêm mới thông tin thông số kịch bản sản xuất
-    public void postChiTietSanXuat(List<ChiTietSanXuatRequest> requests){
-        for (ChiTietSanXuatRequest request:requests){
+    public void postChiTietSanXuat(List<ChiTietSanXuatRequest> requests) {
+        for (ChiTietSanXuatRequest request : requests) {
             ChiTietSanXuat entity = new ChiTietSanXuat();
             entity.setMaKichBan(request.getMaKichBan());
             entity.setHangSxhn(request.getRows());
@@ -644,16 +716,17 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             entity.setTrungbinh(request.getTrungbinh());
             entity.setDonVi(request.getDonVi());
             chiTietSanXuatRepository.save(entity);
-            System.out.println("id: "+ entity.getId());
+            System.out.println("id: " + entity.getId());
             chiTietSanXuatRepository.updateIdSanXuatHangNgay(request.getIdSanXuatHangNgay(), entity.getId());
         }
     }
+
     //? xem danh sach thong so san xuat hang ngay theo id san xuat hang ngay
-    public List<ChiTietSanXuatResponse> getAllsById(Long id){
+    public List<ChiTietSanXuatResponse> getAllsById(Long id) {
         List<ChiTietSanXuat> entities = chiTietSanXuatRepository.findAllBySanXuatHangNgayId(id);
         List<ChiTietSanXuatResponse> responseList = new ArrayList<>();
         log.info("xem danh sach kich ban");
-        for (ChiTietSanXuat entity:entities){
+        for (ChiTietSanXuat entity : entities) {
             ChiTietSanXuatResponse response = new ChiTietSanXuatResponse();
             response.setId(entity.getId());
             response.setMaKichBan(entity.getMaKichBan());
@@ -667,9 +740,10 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         }
         return responseList;
     }
+
     //? Cap nhat noi dung san xuat hang ngay (1)
-    public void putChiTietSanXuat(List<ChiTietSanXuatRequest> requestList){
-        for (ChiTietSanXuatRequest request :requestList) {
+    public void putChiTietSanXuat(List<ChiTietSanXuatRequest> requestList) {
+        for (ChiTietSanXuatRequest request : requestList) {
             ChiTietSanXuat entity = chiTietSanXuatRepository.findById(request.getId()).orElse(null);
             if (entity != null) {
                 entity.setThongSo(request.getThongSo());
@@ -678,7 +752,7 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
                 entity.setTrungbinh(request.getTrungbinh());
                 entity.setDonVi(request.getDonVi());
                 chiTietSanXuatRepository.save(entity);
-            }else {
+            } else {
                 ChiTietSanXuat entity1 = new ChiTietSanXuat();
                 entity1.setMaKichBan(request.getMaKichBan());
                 entity1.setThongSo(request.getThongSo());
@@ -691,30 +765,33 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             }
         }
     }
+
     // ? (1)xoa thong so trong noi dung san xuat hang ngay
-    public void delByIdChiTietSanXuat(Long idChiTietSanXuat){
+    public void delByIdChiTietSanXuat(Long idChiTietSanXuat) {
         ChiTietSanXuat entity = chiTietSanXuatRepository.findById(idChiTietSanXuat).orElse(null);
-        if (entity == null){
+        if (entity == null) {
             log.info("khong tim thay thong so");
-        }else {
+        } else {
             chiTietSanXuatRepository.delete(entity);
             log.info("xoa thong so thanh cong");
         }
     }
+
     //? xem chi tiet noi dung 1 kich ban san xuat hang ngay
-    public SanXuatHangNgayResponse chiTietSanXuat (Long maKichBan){
+    public SanXuatHangNgayResponse chiTietSanXuat(Long maKichBan) {
         SanXuatHangNgay entity = sanXuatHangNgayRepository.findById(maKichBan).orElse(null);
         SanXuatHangNgayResponse response = getSanXuatHangNgayResponse(entity);
         response.setChiTietSanXuat((List<ChiTietSanXuat>) entity.getChiTietSanXuats());
         log.info("thanh cong");
         return response;
     }
+
     // ☺ xoa kich ban trong sasn xuat hang ngay
-    public void delSanXuatHangNgay(Long id){
+    public void delSanXuatHangNgay(Long id) {
         SanXuatHangNgay entities = sanXuatHangNgayRepository.findById(id).orElse(null);
-        if (entities == null){
+        if (entities == null) {
             log.info("khong tim thay kich ban");
-        }else {
+        } else {
             // tim kiem thong tin chi tiet kich ban
             List<ChiTietSanXuat> entityList = chiTietSanXuatRepository.findAllBySanXuatHangNgayId(id);
             chiTietSanXuatRepository.deleteAll(entityList);
@@ -722,12 +799,30 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
             log.info("xoa kich ban thanh cong");
         }
     }
+
+    //☺ xem thong so san xuat hang ngay theo ma kich ban
+    public List<ChiTietSanXuatResponse> getChiTietSanXuatByMaKichBan(String maKichBan) {
+        List<ChiTietSanXuat> chiTietSanXuatList = this.chiTietSanXuatRepository.getChiTietSanXuatByMaKichBan(maKichBan);
+        System.out.println("lissssst:   " + chiTietSanXuatList.toString());
+        List<ChiTietSanXuatResponse> responseList = new ArrayList<>();
+        for (ChiTietSanXuat chiTietSanXuat : chiTietSanXuatList) {
+            ChiTietSanXuatResponse response = new ChiTietSanXuatResponse();
+            response.setThongSo(chiTietSanXuat.getThongSo());
+            response.setMaxValue(chiTietSanXuat.getMaxValue());
+            response.setMinValue(chiTietSanXuat.getMinValue());
+            response.setTrungbinh(chiTietSanXuat.getTrungbinh());
+            response.setDonVi(chiTietSanXuat.getDonVi());
+            responseList.add(response);
+        }
+        return responseList;
+    }
+
     //------------------------------------------------------ *  --------------------------------------------------------
     //------------------------------------------------ Loại thiết bị ---------------------------------------------------
-    public List<NhomThietBiResponse> getAllNhomThietBi(){
+    public List<NhomThietBiResponse> getAllNhomThietBi() {
         List<NhomThietBi> nhomThietBis = this.nhomThietBiRepository.findAll();
         List<NhomThietBiResponse> responseList = new ArrayList<>();
-        for(NhomThietBi nhomThietBi :nhomThietBis){
+        for (NhomThietBi nhomThietBi : nhomThietBis) {
             NhomThietBiResponse response = new NhomThietBiResponse();
             response.setLoaiThietBi(nhomThietBi.getLoaiThietBi());
             response.setMaThietBi(nhomThietBi.getMaThietBi());
@@ -736,24 +831,26 @@ public void postChiTietKichBan(List<ChiTietKichBanRequest> requests){
         }
         return responseList;
     }
+
     //------------------------------------------------------ *  --------------------------------------------------------
     //------------------------------------------------ Don vi---------------------------------------------------
-    public List<DonViResponse> getAllDonVi (){
+    public List<DonViResponse> getAllDonVi() {
         List<DonVi> donVis = this.donViRepository.findAll();
         List<DonViResponse> responseList = new ArrayList<>();
-        for (DonVi donVi :donVis){
+        for (DonVi donVi : donVis) {
             DonViResponse response = new DonViResponse();
             response.setDonVi(donVi.getDonVi());
             responseList.add(response);
         }
         return responseList;
     }
+
     //--------------------------------------------------- * ------------------------------------------------------------
     //-------------------------------------- Day chuyen ------------------------------------
-    public List<DayChuyenResponse> getAllDayChuyen(){
+    public List<DayChuyenResponse> getAllDayChuyen() {
         List<DayChuyen> dayChuyenList = this.dayChuyenRepository.findAll();
         List<DayChuyenResponse> responseList = new ArrayList<>();
-        for (DayChuyen dayChuyen :dayChuyenList){
+        for (DayChuyen dayChuyen : dayChuyenList) {
             DayChuyenResponse response = new DayChuyenResponse();
             response.setDayChuyen(dayChuyen.getDayChuyen());
             responseList.add(response);

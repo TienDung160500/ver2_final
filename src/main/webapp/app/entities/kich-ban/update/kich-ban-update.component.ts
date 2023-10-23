@@ -237,6 +237,7 @@ export class KichBanUpdateComponent implements OnInit {
       status: '',
       phanLoai: '',
     };
+    // đây là api request về db để lấy chi tiết kịch bản, đọc kĩ thằng này rồi copy sang bên kia
     this.http.post<IChiTietKichBan[]>(this.thietBiUrl, timKiem).subscribe((res: IChiTietKichBan[]) => {
       // khoi tao danh sach
       for (let i = 0; i < res.length; i++) {
